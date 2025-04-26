@@ -24,8 +24,11 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+    env:
+      DATABASE_URL: postgresql://postgres:123456@localhost:5432/simulador_bancario_test
+
     steps:
-      - name: Checkout repositório
+      - name: Checkout do repositório
         uses: actions/checkout@v3
 
       - name: Instalar Node.js
@@ -36,15 +39,11 @@ jobs:
       - name: Instalar dependências
         run: npm install
 
-      - name: Criar arquivo .env.test
-        run: |
-          echo "DATABASE_URL=postgresql://postgres:123456@localhost:5432/simulador_bancario_test" > .env.test
-
-      - name: Gerar client Prisma
+      - name: Gerar Prisma Client
         run: npx prisma generate
 
-      - name: Aplicar migrations
+      - name: Aplicar Migrations
         run: npx prisma migrate deploy --schema=prisma/schema.prisma
 
-      - name: Executar testes
+      - name: Executar Testes
         run: npm run test
