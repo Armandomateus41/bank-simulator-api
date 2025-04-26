@@ -1,0 +1,52 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id            String        @id @default(uuid())
+  owner         String
+  type          AccountType
+  balance       Float         @default(0)
+  status        AccountStatus @default(active)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  transactions  Transaction[] @relation("transactions")
+  incomingTransfers Transaction[] @relation("transferDestinations")
+}
+
+model Transaction {
+  id            String             @id @default(uuid())
+  type          String
+  amount        Float
+  scheduledAt   DateTime?
+  status        TransactionStatus  @default(pending)
+  createdAt     DateTime           @default(now())
+
+  accountId     String
+  account       Account            @relation("transactions", fields: [accountId], references: [id])
+
+  toAccountId   String?
+  toAccount     Account?           @relation("transferDestinations", fields: [toAccountId], references: [id])
+}
+
+enum AccountType {
+  corrente
+  poupanca
+  empresarial
+}
+
+enum AccountStatus {
+  active
+  blocked
+}
+
+enum TransactionStatus {
+  pending
+  executed
+  failed
+}
